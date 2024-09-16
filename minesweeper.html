@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CS 104 PROJECT</title>
+    <link rel="stylesheet" href="minesweeper.css">
+</head>
+<body>
+    <h1>Minesweeper Cricket Game</h1>
+    <div id="scoreboard">
+        <h2>Scoreboard</h2>
+       
+        <table id="scoreTable">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Score</th>
+                </tr>
+            </thead>
+            <tbody id="scoreTableBody">
+            </tbody>
+        </table>
+    </div>
+
+    <div id="videoContainer">
+        <video id="videoPlayer" width="600" height="500" controls>
+            <source src="out.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+    <div id="videoContainer2">
+    <video id="videoPlayer2" width="600" height="500" controls>
+        <source src="six.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+    </div>
+    <video autoplay loop muted class="background-video">
+        <source src="Backgroundvideo.mp4" type="video/mp4">
+      </video>
+    
+    <div id="scoreBox">
+        <p id="scoreValue" style="color: black;font-size:30px;">Score: <span id="score">0</span></p>
+    </div>
+    
+    <h2 id="rules"></h2>
+    <div id="name-input" style="display: none;">
+        <p>Enter your name:</p>
+        <input type="text" id="player-name">
+        <button onclick="submitName()">Submit</button>
+    </div>
+    <div id="grid"></div>
+    <div id="l">
+    <h1>Enter how many squares you want in the line  </h1>
+    <input type="text" id="n">
+    <button onclick="startgame()">Submit</button>
+    </div>
+   
+    
+    <script>
+        
+       
+        var totalFielders = 11;
+        var x=0;
+        var y=0;
+        var grid = [];
+        var score = 0;
+        var gameOver = true;
+        var gridSize= document.getElementById('n').value;
+
+        function submitName() {
+            gameOver=false;
+            score=0;
+            x=0;
+            y=0;
+            startgame();
+        }
+
+        function startgame() {
+            document.getElementById('name-input').style.display = 'block';
+            document.getElementById('l').style.display = 'none';
+            var gridSize= document.getElementById('n').value;
+            updateScore();
+            
+            rules.textContent = 'Select squares which does not have fielders';
+        var gridElement = document.getElementById('grid');
+        gridElement.innerHTML = '';
+                   gridElement.style.display = 'inline-block';
+        
+        if(!gameOver){
+            document.getElementById('name-input').style.display = 'none';
+        for (var i = 0; i < gridSize; i++) {
+            grid[i] = [];
+            for (var j = 0; j < gridSize; j++) {
+                var block = document.createElement('div');
+                block.className = 'block';
+                block.setAttribute('data-row', i);
+                block.setAttribute('data-col', j);
+                block.style.color= 'rgb(222, 107, 166)';
+                block.style.backgroundColor= 'rgb(222, 107, 166)';
+                block.onclick = revealBlock;
+                block.textContent='your';
+                gridElement.appendChild(block);
+                grid[i][j] = { revealed: false, fielder: false,value:0,noball:false,dsc:false}
+            }
+            gridElement.appendChild(document.createElement('br'));
+            
+        }
+
+        
+        for (var count = 0; count < totalFielders; count++) {
+            var row = Math.floor(Math.random() * gridSize);
+            var col = Math.floor(Math.random() * gridSize);
+            if (!grid[row][col].fielder) {
+                grid[row][col].fielder = true;
+            } else {
+                count--;
+            }
+        }
+        for (var count = 0; count < gridSize; count++) {
+            var row = Math.floor(Math.random() * gridSize);
+            var col = Math.floor(Math.random() * gridSize);
+            if (!grid[row][col].fielder&&!grid[row][col].noball) {
+            grid[row][col].value = 1;
+            grid[row][col].noball = true;}
+           else{ count--;}
+        }
+        for (var count = 0; count < gridSize; count++) {
+            var row = Math.floor(Math.random() * gridSize);
+            var col = Math.floor(Math.random() * gridSize);
+            if (!grid[row][col].fielder&&!grid[row][col].noball&&!grid[row][col].dsc) {
+            grid[row][col].dsc = true;}
+            else{ count--;}
+        }
+        for (var i=0;i<gridSize;i++){
+            for (var j=0;j<gridSize;j++){
+                if (!grid[i][j].fielder&&!grid[i][j].noball&&!grid[i][j].dsc) {
+                    grid[i][j].value =  Math.floor(Math.random() * 7);
+                } 
+            }
+        }}}
+
+    
+        function revealBlock() {
+            if(gameOver){return;}
+
+            var row = parseInt(this.getAttribute('data-row'));
+            var col = parseInt(this.getAttribute('data-col'));
+
+            if (grid[row][col].revealed) return;
+
+            grid[row][col].revealed = true;
+
+            if(grid[row][col].dsc){ 
+                alert('It is a doublescore powerup so score doubles in next one');
+                this.style.color='black';
+                var blockElement = this;
+                blockElement.innerHTML = 'Power';
+                y=1;
+                score=score+ grid[row][col].value;
+                updateScore();
+                grid[row][col].dsc=false;
+                grid[row][col].revealed = false;
+                this.style.backgroundColor = 'blue';
+                
+                setTimeout(function(){
+                    blockElement .style.backgroundColor= 'rgb(222, 107, 166)';
+                    blockElement .style.color= 'rgb(222, 107, 166)';
+                   }, 2000);
+                 
+                 
+                    var m=Math.floor(Math.random() * gridSize * gridSize);
+                    if(m<11) {grid[row][col].fielder=true;}
+                    else{grid[row][col].value =  Math.floor(Math.random() * 7);}
+            }
+
+
+           else if(grid[row][col].noball){
+            alert('It is a no ball so next one is a freehit');
+            
+            this.style.color='black';
+            var blockElement = this;
+                blockElement.innerHTML = 'NoBall';
+            x=1;
+            if(y==1){
+                score=score+ 2*grid[row][col].value;}
+                else{score=score+ grid[row][col].value;}
+            
+            y=0;
+            updateScore();
+            grid[row][col].noball=false;
+            grid[row][col].revealed = false;
+            this.style.backgroundColor = 'blue';
+            var blockElement = this;
+            setTimeout(function(){
+                blockElement .style.backgroundColor= 'rgb(222, 107, 166)';
+                blockElement .style.color= 'rgb(222, 107, 166)';
+               }, 2000);
+             
+             
+                var m=Math.floor(Math.random() * gridSize * gridSize);
+                if(m<11) {grid[row][col].fielder=true;}
+                else{grid[row][col].value =  Math.floor(Math.random() * 7);}
+           }
+           else{ if (grid[row][col].fielder) {
+                if(x==0){
+                gameOver = true;
+                this.style.backgroundColor = 'red';
+                this.style.color='black';
+                var blockElement = this;
+                blockElement.innerHTML = 'OUT';
+                document.getElementById('videoContainer').style.display = 'block';
+                
+                updateScoreTable();
+                
+                var videoContainer = document.getElementById('videoContainer');
+                videoContainer.style.display = 'block';
+                var videoPlayer= document.getElementById('videoPlayer');
+                videoPlayer.play();
+                videoPlayer.addEventListener('ended', function() {
+                    videoContainer.style.display = 'none';
+                    document.getElementById('name-input').style.display = 'block';
+                    
+                });
+                setTimeout(function(){
+                    alert('Game Over! Your score: ' + score);
+                    alert('Next player can enter and submit their name to play');
+                    var gridElement = document.getElementById('grid');
+                   gridElement.style.display = 'none';
+                   }, 3000);
+                   
+                
+            }else{x=0;
+                y=0;
+                this.style.backgroundColor = 'red';
+                this.style.color='black';
+                var blockElement = this;
+                blockElement.innerHTML = '0';} }
+            
+            
+            else {
+                this.style.backgroundColor = 'green';
+                this.style.color='black';
+                var blockElement = this;
+                blockElement.innerHTML =grid[row][col].value ;
+                if(y==1){
+                score=score+ 2*grid[row][col].value;}
+                else{score=score+ grid[row][col].value;}
+                y=0;
+                if(grid[row][col].value==6){
+                    var videoContainer2 = document.getElementById('videoContainer2');
+                    videoContainer2.style.display = 'block';
+                    var videoPlayer2 = document.getElementById('videoPlayer2');
+                    videoPlayer2.play();
+                    videoPlayer2.addEventListener('ended', function() {
+                        videoContainer2.style.display = 'none';
+                    });
+                }
+                updateScore();
+                x=0;
+            }}}
+            function updateScore() {
+                var scoreval = document.getElementById('score');
+                scoreval.textContent = score;
+            }
+            function updateScoreTable() {
+                var playerName = document.getElementById('player-name').value;
+                var scoreTableBody = document.getElementById('scoreTableBody');
+                var newRow = document.createElement('tr');
+                var nameCell = document.createElement('td');
+                var scoreCell = document.createElement('td');
+    
+                nameCell.textContent = playerName;
+                scoreCell.textContent = score;
+    
+                newRow.appendChild(nameCell);
+                newRow.appendChild(scoreCell);
+                scoreTableBody.appendChild(newRow);
+                
+            }
+    </script>
+</body>
+</html>'
